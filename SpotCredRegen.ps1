@@ -6,25 +6,24 @@
 # - Spotx app installed and patched (see here https://github.com/SpotX-Official/SpotX)
 #
 # check existence of :
-#	spotify app in C:
 
-	# 1st test existence of local file .SpotAppPath containing application path
-	
 	#================================================
-	# Check existence of Spotify.exe, exit if unfound 
+	# Check existence of Spotify.exe
+	# + record path in .\.spotpath file 
+	# + or exit if unfound 
 	#================================================
 	$spotappfound = $false
 	
-	if ((gci ".\.spotpath" -ErrorAction SilentlyContinue) -ne $null) {	# if local file .spotpath exists
+	if ((gci ".\.spotpath" -ErrorAction SilentlyContinue) -ne $null) {			# if local file .spotpath exists
 		$SpotAppPath = get-content ".\.spotpath"
 		if ($SpotAppPath -ne $null) {			# if not empty path			
 			if ((gci $SpotAppPath -ErrorAction SilentlyContinue) -ne $null) {	# if spot app path in dotfile is valid
-				"Using configured Spotify.exe located in : $SpotAppPath"
+				"Using configured Spotify.exe located in : $SpotAppPath"		# then tell so
 				$spotappfound = $true
-			} else { 
+			} else { 							# in any other case spot app path (in dotfile) not valid
 				$spotappfound = $false
 			}
-		} else {
+		} else {								# in any other case spot app path (in dotfile) not valid
 			$spotappfound = $false
 		}
 	}
@@ -33,6 +32,7 @@
 		"Searching Spotify.exe in C:\ ..."
 		$SpotSearch = $(gci -path "c:\" -filter "spotify.exe" -recurse -ErrorAction SilentlyContinue -Force)
 		if ($SpotSearch -eq $null) {	# then spotify.exe not found on disk C
+			"--"
 			"Spotify.exe not installed - cannot continue :/"
 			Exit-PSSession
 		}
@@ -46,7 +46,7 @@
 						$i++
 				}
 				do {
-					$instance = read-host "Select the correct one [1..$($SpotSearch.count)]"
+					$instance = read-host "Enter the correct one [1..$($SpotSearch.count)]"
 				} until ($instance -ge 1 -and $instance -le $SpotSearch.count)
 				$SpotAppPath = $SpotSearch[$instance-1].fullname
 			} else {
