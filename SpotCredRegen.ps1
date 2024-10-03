@@ -19,7 +19,7 @@
 		$SpotAppPath = get-content ".\.spotpath"
 		if ($SpotAppPath -ne $null) {			# if not empty path			
 			if ((gci $SpotAppPath -ErrorAction SilentlyContinue) -ne $null) {	# if spot app path in dotfile is valid
-				"Valid Spotify.exe found -> $SpotAppPath"
+				"Using configured Spotify.exe located in : $SpotAppPath"
 				$spotappfound = $true
 			} else { 
 				$spotappfound = $false
@@ -37,15 +37,20 @@
 			Exit-PSSession
 		}
 		else {	# spotify.exe found in c:\
-			$SpotAppPath = $SpotSearch[0]
 			if ($SpotSearch.count -gt 1) {	# more than one instance found, list all but pick 1st one
-				"Several Spotify.exe instances found (choosing the 1st one) :"
-				$i = 0
-				foreach ($f in $SpotSearch.count) {
-						"$i : $f"
+				"--"
+				"More than 1 Spotify.exe instance found :"
+				$i = 1
+				foreach ($f in $SpotSearch) {
+						"$i : created $($f.creationtime) in $($f.directoryname)"
 						$i++
 				}
+				do {
+					$instance = read-host "Select the correct one [1..$($SpotSearch.count)]"
+				} until ($instance -ge 1 -and $instance -le $SpotSearch.count)
+				$SpotAppPath = $SpotSearch[$instance-1].fullname
 			} else {
+				$SpotAppPath = $SpotSearch.fullname
 				"Spotify.exe found: $SpotAppPath"
 			}
 		}
