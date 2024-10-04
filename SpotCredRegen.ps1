@@ -32,6 +32,14 @@
 	# LibspotAuthPath = c:\<the path to librespot-auth.exe> ...
 	#================================================
 
+	# by default create a void hashtable
+	
+	$utilpaths = @{
+		'SpotAppPath' = ''
+		'ZotDataPath' = ''
+		'LibspotAuthPath' = ''
+	}
+		
 	if ((gci ".\.utilpaths" -ErrorAction SilentlyContinue) -ne $null) {			# if local file .utilpaths exists
 		# read its contents shaped into a hash table
 		$utilpaths = (get-content ".\.utilpaths") -replace '\\', '\\' | out-string | ConvertFrom-StringData
