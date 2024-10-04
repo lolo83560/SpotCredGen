@@ -188,6 +188,13 @@
 	start-process -filepath $LibspotAuthPath
 	start-process -filepath $SpotAppPath -Wait
 	
+	$cred = get-content ".\credentials.json"
+	$cred = $cred -replace '\"auth_type\":1', '"type":"AUTHENTICATION_STORED_SPOTIFY_CREDENTIALS"'
+	$cred = $cred -replace '\"auth_data\"','"credentials"'
+	$cred | out-file ".\credentials.json" -Force
+	
+	move-item -path ".\credentials.json" -destination $ZotDataPath -force
+
 	Eject(":) all OK !")
 	
 # patch credentials.json
