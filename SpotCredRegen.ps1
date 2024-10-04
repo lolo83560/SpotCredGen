@@ -8,7 +8,7 @@
 	#================================================
 	#================================================
 	# function to exit abruptly after havind
-	function Eject([string]message) {
+	function Eject([string]$message) {
 		# Update local config file .utilpaths w/ info potentially just refreshed
 		if ($utilpaths -ne $null) {	# note: does not check if contents is valid
 			$utilpaths.GetEnumerator() | ForEach-Object { "{0}={1}" -f $_.Name,$_.Value } | Set-Content ".\.utilpaths" -force
@@ -101,7 +101,7 @@
 
 	if (test-path $ZotDataPath -eq $null) {						# if path given in .utilpath does not exist
 		$ZotDataPath = "$($env:APPDATA)\zotify"					# try the default one
-		if (test-path $ZotDataPath -eq $null) {					# if zotify appdata does not exist, no need to continue
+		if ((test-path $ZotDataPath) -eq $null) {					# if zotify appdata does not exist, no need to continue
 			"--"
 			Eject("### FATAL - Zotify is not installed - cannot continue :/")
 		}
@@ -113,40 +113,40 @@
 	# exit if unfound 
 	#================================================
 
-	$LS-authappfound = $false
+	$LSauthappfound = $false
 	if ($LibspotAuthPath -ne $null) {							# if librespot-auth path retreived from config file is not empty, check its validity
 		if ((gci $LibspotAuthPath -ErrorAction SilentlyContinue) -ne $null) {	# if librespot-auth app path in dotfile is valid
 			"Using configured librespot-auth.exe located in : $LibspotAuthPath"		# then tell so
-			$LS-authappfound = $true
+			$LSauthappfound = $true
 		} else { 							# in other case librespot-auth app path (in dotfile) not valid
-			$LS-authappfound = $false
+			$LSauthappfound = $false
 		}
 	} else {								# in other case librespot-auth app path (in dotfile) was unexisting
-		$LS-authappfound = $false
+		$LSauthappfound = $false
 	}
 
-	if ( $LS-authappfound -eq $false ) {		# if not found from .utilpaths file then search it in current harddisk
+	if ( $LSauthappfound -eq $false ) {		# if not found from .utilpaths file then search it in current harddisk
 		"Searching librespot-auth.exe in C:\ ..."
-		$LS-authSearch = $(gci -path "c:\" -filter "librespot-auth.exe" -recurse -ErrorAction SilentlyContinue -Force)
-		if ($LS-authSearch -eq $null) {		# no librespot-auth.exe can be found on disk C
+		$LSauthSearch = $(gci -path "c:\" -filter "librespot-auth.exe" -recurse -ErrorAction SilentlyContinue -Force)
+		if ($LSauthSearch -eq $null) {		# no librespot-auth.exe can be found on disk C
 			Eject("### FATAL - librespot-auth.exe not found - cannot continue :/")
 			
 		}
 		else {								# librespot-auth.exe found in c:\
-			if ($LS-authSearch.count -gt 1) {	# in case more than one instance found, list all and propose choice
+			if ($LSauthSearch.count -gt 1) {	# in case more than one instance found, list all and propose choice
 				"--"
 				"More than 1 librespot-auth.exe instance found :"
 				$i = 1
-				foreach ($f in $LS-authSearch) {
+				foreach ($f in $LSauthSearch) {
 						"$i : created $($f.creationtime) in $($f.directoryname)"
 						$i++
 				}
 				do {
-					$instance = read-host "Enter the correct one [1..$($LS-authSearch.count)]"
-				} until ($instance -ge 1 -and $instance -le $LS-authSearch.count)
-				$LibspotAuthPath = $LS-authSearch[$instance-1].fullname
+					$instance = read-host "Enter the correct one [1..$($LSauthSearch.count)]"
+				} until ($instance -ge 1 -and $instance -le $LSauthSearch.count)
+				$LibspotAuthPath = $LSauthSearch[$instance-1].fullname
 			} else {
-				$LibspotAuthPath = $LS-authSearch.fullname
+				$LibspotAuthPath = $LSauthSearch.fullname
 				"librespot-auth.exe found: $LibspotAuthPath"
 			}
 		}
