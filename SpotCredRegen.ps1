@@ -2,12 +2,12 @@
 # LL - 02-oct-2024
 #
 # Prerequisites:
-# - librespot-auth.exe (built from https://github.com/tgmb1/getcredentials.json.git)
-# - Spotx app installed and patched (see here https://github.com/SpotX-Official/SpotX)
+# - build librespot-auth.exe from https://github.com/tgmb1/getcredentials.json.git)
+# - install+patch Spotx app (see here https://github.com/SpotX-Official/SpotX)
 
 	#================================================
 	#================================================
-	# function to exit abruptly after havind
+	# function to exit the script abruptly with a message
 	function Eject([string]$message) {
 		# Update local config file .utilpaths w/ info potentially just refreshed
 		if ($utilpaths -ne $null) {	# note: does not check if contents is valid
@@ -190,12 +190,6 @@
 	
 	Eject(":) all OK !")
 	
-#	Warn about firewall
-#
-# Algo :
-#
-# run spotify app
-# run librespot-auth.exe, wait till exit & successful gen' of cred file
 # patch credentials.json
 # move credentials.json -> zotify appdata/...
 
