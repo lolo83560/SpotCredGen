@@ -32,7 +32,7 @@
 	# LibspotAuthPath = c:\<the path to librespot-auth.exe> ...
 	#================================================
 
-	# by default create a void hashtable
+	# by default create a void hashtable for .utilpaths handling
 	
 	$utilpaths = @{
 		'SpotAppPath' = ''
@@ -55,9 +55,9 @@
 	#================================================
 
 	$spotappfound = $false
-	if ($SpotAppPath -ne $null) {			# if Spotify app path retreived from config file is not empty, check its validity	
+	if ($SpotAppPath -ne '') {			# if Spotify app path retreived from config file is not empty, check its validity	
 		if ((gci $SpotAppPath -ErrorAction SilentlyContinue) -ne $null) {	# if spot app path in dotfile is valid
-			"Using configured Spotify.exe located in : $SpotAppPath"		# then tell so
+			"Using configured Spotify.exe located at : $SpotAppPath"		# then tell so
 			$spotappfound = $true
 		} else { 							# in other case spot app path (in dotfile) not valid
 			$spotappfound = $false
@@ -83,7 +83,7 @@
 						$i++
 				}
 				do {
-					$instance = read-host "Enter the correct one [1..$($SpotSearch.count)]"
+					$instance = read-host "Choose the correct one [1..$($SpotSearch.count)]"
 				} until ($instance -ge 1 -and $instance -le $SpotSearch.count)
 				$SpotAppPath = $SpotSearch[$instance-1].fullname
 			} else {
@@ -95,17 +95,25 @@
 	$utilpaths.SpotAppPath = $SpotAppPath	# update hastable so eventually .utilpaths file gets updated w/ fresh info
 	
 	#================================================
-	# Check existence of appdata\roaming\zotify
+	# Check existence of given ....\zotify
+	# or try default one
 	# exit if unfound 
 	#================================================
 
-	if (test-path $ZotDataPath -eq $null) {						# if path given in .utilpath does not exist
-		$ZotDataPath = "$($env:APPDATA)\zotify"					# try the default one
-		if ((test-path $ZotDataPath) -eq $null) {					# if zotify appdata does not exist, no need to continue
-			"--"
+	$zotdatfound = $false
+	if ($ZotDataPath -ne '') {				# if Zotify data path retreived from config file is not empty, check its validity	
+		if ((test-path $ZotDataPath) -eq $true) {							# if it's valid
+			"Using configured Zotify data located at : $ZotDataPath"		# then tell so
+			$zotdatfound = $true
+		}
+	} 
+	if ($zotdatfound -eq $false) {							# no path was given in .utilpath or it's wrong
+		$ZotDataPath = "$($env:APPDATA)\zotify"				# try the normal one expected by default
+		if ((test-path $ZotDataPath) -eq $false) {			# if zotify appdata does not exist, no need to continue
 			Eject("### FATAL - Zotify is not installed - cannot continue :/")
 		}
-	}
+	} 
+	"Zotify data found: $ZotDataPath"
 	$utilpaths.ZotDataPath = $ZotDataPath	# update hastable so eventually .utilpaths file gets updated w/ fresh info
 	
 	#================================================
@@ -114,9 +122,9 @@
 	#================================================
 
 	$LSauthappfound = $false
-	if ($LibspotAuthPath -ne $null) {							# if librespot-auth path retreived from config file is not empty, check its validity
+	if ($LibspotAuthPath -ne '') {			# if librespot-auth path retreived from config file is not empty, check its validity
 		if ((gci $LibspotAuthPath -ErrorAction SilentlyContinue) -ne $null) {	# if librespot-auth app path in dotfile is valid
-			"Using configured librespot-auth.exe located in : $LibspotAuthPath"		# then tell so
+			"Using configured librespot-auth.exe located at : $LibspotAuthPath"	# then tell so
 			$LSauthappfound = $true
 		} else { 							# in other case librespot-auth app path (in dotfile) not valid
 			$LSauthappfound = $false
@@ -130,10 +138,9 @@
 		$LSauthSearch = $(gci -path "c:\" -filter "librespot-auth.exe" -recurse -ErrorAction SilentlyContinue -Force)
 		if ($LSauthSearch -eq $null) {		# no librespot-auth.exe can be found on disk C
 			Eject("### FATAL - librespot-auth.exe not found - cannot continue :/")
-			
 		}
 		else {								# librespot-auth.exe found in c:\
-			if ($LSauthSearch.count -gt 1) {	# in case more than one instance found, list all and propose choice
+			if ($LSauthSearch.count -gt 1) {# in case more than one instance found, list all and propose choice
 				"--"
 				"More than 1 librespot-auth.exe instance found :"
 				$i = 1
@@ -142,7 +149,7 @@
 						$i++
 				}
 				do {
-					$instance = read-host "Enter the correct one [1..$($LSauthSearch.count)]"
+					$instance = read-host "Choose the correct one [1..$($LSauthSearch.count)]"
 				} until ($instance -ge 1 -and $instance -le $LSauthSearch.count)
 				$LibspotAuthPath = $LSauthSearch[$instance-1].fullname
 			} else {
@@ -152,9 +159,37 @@
 		}
 	}
 	$utilpaths.LibspotAuthPath = $LibspotAuthPath	# update hastable so eventually .utilpaths file gets updated w/ fresh info
-		
-# 	appdata\roaming\zotify
-# 	librespot-auth.exe
+	
+	"************************************************************************"
+	"* NOW READ THESE INSTRUCTIONS:                                           *"
+	"*                                                                        *"
+	"* 1- I am going to launch the Spotify app + librespot-auth app           *"
+	"* 2- In Spotify app you will want to :                                   *"
+	"*   2.1  - log in to your Spotify account                                *"
+	"*   2.2  - at the bottom right corner, left of the volume control bar    *"
+	"*          click on the tiny icon `"Connect to a Device`"                  *"
+	"*   2.3  - a pannel appears on the right part of Spotify app             *"
+	"*                                                                        *"
+	"*        -> there, click on the `"Select another device, Speaker`" icon    *"
+	"*                                                                        *"
+	"*    /!\ IMPORTANT: your firewall may corrupt the process and prevent    *"
+	"*                   the `"Speaker`" device to appear in Spotify!           *"
+	"*                   In that case you want to try to disable              *"
+	"*                   momentarily the firewall.                            *"
+	"*                                                                        *"
+	"*                                                                        *"
+	"* 3 - QUIT Spotify app                                                   *"
+	"*                                                                        *"
+	"*   et voilà :)                                                          *"
+	"*                                                                        *"
+	"************************************************************************"
+	read-host "Press Return when you're ready"
+
+	start-process -filepath $LibspotAuthPath
+	start-process -filepath $SpotAppPath -Wait
+	
+	Eject(":) all OK !")
+	
 #	Warn about firewall
 #
 # Algo :
